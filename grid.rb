@@ -99,9 +99,7 @@ class Grid
       "\u2577", "\u2510", "\u250C", "\u252C",   #  ╷  ┐  ┌  ┬
       "\u2502", "\u2524", "\u251C", "\u253C"]   #  │  ┤  ├  ┼
 
-    aux_n = Cell.new(-1,-1)
-    aux_w = Cell.new(-1,-1)
-    aux_d = Cell.new(-1,-1)
+    aux_d = aux_w = aux_n = Cell.new(-1,-1)
     aux_n.link(aux_d)
     aux_w.link(aux_d)
 
