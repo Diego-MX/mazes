@@ -154,6 +154,52 @@ class Grid
   end
 
   def to_s
+    # PREPARATION
+    hrz = "\u2500"  #  ─
+    vrt = "\u2502"  #  │
+    crn = "\u2518"  #  ┘
+    nswe = ["", "\u2576", "\u2574", "\u2500",   #     ╶  ╴  ─
+      "\u2577", "\u250C", "\u2510", "\u252C",   #  ╷  ┌  ┐  ┬
+      "\u2575", "\u2514", "\u2518", "\u2534",   #  ╵  └  ┘  ┴
+      "\u2502", "\u251C", "\u2524", "\u253C"]   #  │   ├  ┤  ┼
+     
+    aux_nw = aux_ne = aux_sw = aux_se = Cell.new(-1,-1)
+    aux_nw.link(aux_ne)
+    aux_ne.link(aux_se)
+    aux_se.link(aux_sw)
+    aux_sw.link(aux_nw)
+     
+    # CALCULATION
+    out = ""
+    for r in 0..@rows
+      top = "\t"
+      mid = "\t"
+      for c in 0..@cols
+        cell_nw = self[r-1, c-1] || aux_nw
+        cell_ne = self[r-1, c  ] || aux_ne
+        cell_sw = self[r  , c-1] || aux_sw
+        cell_se = self[r  , c  ] || aux_se
+          
+        # Edges referenced about NW corner of cell_
+        edge_n = !cell_nw.linked?(cell_ne)
+        edge_s = !cell_sw.linked?(cell_se)
+        edge_w = !cell_nw.linked?(cell_sw)
+        edge_e = !cell_ne.linked?(cell_se)
+        edges = [edge_n, edge_s, edge_w, edge_e]
+        key = edges.inject(0){|n, b| 2*n + (b ?1:0)}
+          
+        top << nswe[key] + (edge_e ? hrz : " ")*3
+        mid << (edge_s ? vrt : " ") + " #{contents_of(cell_)} "
+      end
+      # Edges referenced about NE corner of cell_
+      top << "\n"
+      mid << "\n"
+      out << top + mid
+    end
+    out
+  end
+  
+  def to_s2
     hrz  =  "\u2500"    #  ─
     vrt  =  "\u2502"    #  │
     crn  =  "\u2518"    #  ┘
@@ -161,7 +207,7 @@ class Grid
       "\u2577", "\u250C", "\u2510", "\u252C",     #  ╷  ┌  ┐  ┬
       "\u2575", "\u2514", "\u2518", "\u2534",     #  ╵  └  ┘  ┴
       "\u2502", "\u251C", "\u2524", "\u253C"]     #  │  ├  ┤  ┼
-
+     
     extended = Grid.new(@rows+2, @cols+2)
     # extended[1..@rows+1, 1..@cols+1] = @grid
     for r in 0...@rows
