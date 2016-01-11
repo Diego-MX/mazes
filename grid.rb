@@ -165,6 +165,7 @@ class Grid
       "\u2502", "\u251C", "\u2524", "\u253C"]     #  │  ├  ┤  ┼
 
     extended = Grid.new(@rows+2, @cols+2)
+    # extended[1..@rows+1, 1..@cols+1] = @grid
     for r in 0...@rows
       for c in 0...@cols
         extended[r+1, c+1] = @grid[r,c]
