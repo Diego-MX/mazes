@@ -155,9 +155,10 @@ class Grid
 
   def to_s
     # PREPARATION
-    hrz = "\u2500"  #  ─
-    vrt = "\u2502"  #  │
-    crn = "\u2518"  #  ┘
+    hrz0 = "   "
+    hrz1 = "\u2500"*3  #  ───
+    vrt0 = " "
+    vrt1 = "\u2502"    #  │
     nswe = ["", "\u2576", "\u2574", "\u2500",   #     ╶  ╴  ─
       "\u2577", "\u250C", "\u2510", "\u252C",   #  ╷  ┌  ┐  ┬
       "\u2575", "\u2514", "\u2518", "\u2534",   #  ╵  └  ┘  ┴
@@ -180,7 +181,6 @@ class Grid
         cell_sw = self[r  , c-1] || aux_sw
         cell_se = self[r  , c  ] || aux_se
           
-        # Edges referenced about NW corner of cell_
         edge_n = !cell_nw.linked?(cell_ne)
         edge_s = !cell_sw.linked?(cell_se)
         edge_w = !cell_nw.linked?(cell_sw)
@@ -188,10 +188,9 @@ class Grid
         edges = [edge_n, edge_s, edge_w, edge_e]
         key = edges.inject(0){|n, b| 2*n + (b ?1:0)}
           
-        top << nswe[key] + (edge_e ? hrz : " ")*3
-        mid << (edge_s ? vrt : " ") + " #{contents_of(cell_)} "
+        top << nswe[key] + (edge_e ? hrz1 : hrz0)
+        mid << (edge_s ? vrt1 : vrt0) + " #{contents_of(cell_)} "
       end
-      # Edges referenced about NE corner of cell_
       top << "\n"
       mid << "\n"
       out << top + mid
