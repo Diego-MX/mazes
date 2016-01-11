@@ -112,9 +112,9 @@ class Grid
       mid = "\t"
       btm = "\t"
       for cell_ in row.each
-        cell_n = cell_.north ? cell_.north : aux_n
-        cell_w = cell_.west  ? cell_.west  : aux_w
-        cell_d = cell_n.west ? cell_n.west : aux_d
+        cell_n = cell_.north || aux_n
+        cell_w = cell_.west  || aux_w
+        cell_d = cell_n.west || aux_d
 
         # Edges referenced about NW corner of cell_
         edge_n = !cell_n.linked?(cell_d)
