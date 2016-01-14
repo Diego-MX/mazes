@@ -23,29 +23,28 @@ class AldousBroder
     end
     
     unvisited = Set.new(grid.each_cell)
-    def borders_unvisited?(cell)
+    def borders_unvisited?(cell)  # How does this depend on unvisited, dynamically or statically? 
       !(cell in unvisited) and any(cell.neighbors in unvisited)
     end
     
+    boundaries = Hash.new()
     cell = unvisited.sample
-    unvisited.delete(cell)
-    boundaries = {cell => 1/2}
+    cell = unvisited.delete(cell)
     until unvisited.empty? do
+      # Examine BOUNDARIES Keys
+      candidates = cell.neighbors.join(cell)
+      candidates.each do |cndte|
+        borders_unvisited?(cndte) ? boundaries.add(cndte => 1): boundaries.delete(cndte)
+      end
+      # Adjust BOUNDARIES Values
+      boundaries.each do |bndry|
+        boundaries[bndry] = 1/ (1+ manhattan(bndry, cell))
+      end
+      # Choose CELL from BOUNDARY with weights and its NEIGHBOR.
       bndry = Pickup.new(boundaries).pick   # Is this the best package to sample with weights?
       bndry_neighbors = filter(neighbors in unvisited)
       cell = bndry_neighbors.sample
       unvisited.delete(cell)
-      
-      # Examine Boundary Keys
-      candidates = cell.neighbors.join(cell)
-      candidates.each do |cndte|
-        borders_unvisited?(cell) ? boundaries.add(cndte << 1): boundaries.remove(cndte)
-      end
-      # Adjust Boundary Values.  Might make the algorithm longer.  
-      boundaries.each do |bndry|
-        boundaries[bndry] = 1/ (1+ manhattan(bndry, cell))
-      end
-      
     end
     grid
   end
