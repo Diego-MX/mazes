@@ -36,8 +36,8 @@ class Grid
 
   def rand_cell
     r = rand(@rows)
-    c = rand(@grid[row].count)
-    self[row, col]
+    c = rand(@grid[r].count)
+    self[r, c]
   end
   def size
       @rows * @cols
@@ -81,145 +81,48 @@ class Grid
       output << mid << "\n"
       output << btm << "\n"
     end
-    output << "\n\n"
+    output << "\n"
   end
 
-  def to_s1
+  def to_s
     # PREPARATION
-    hrz = "\u2500"  #  ─
-    vrt = "\u2502"  #  │
-    crn = "\u2518"  #  ┘
+    hrz0 = " "*3
+    hrz1 = "\u2500"*3  #  ───
+    vrt0 = " "
+    vrt1 = "\u2502"    #  │
     nswe = ["", "\u2576", "\u2574", "\u2500",   #     ╶  ╴  ─
       "\u2577", "\u250C", "\u2510", "\u252C",   #  ╷  ┌  ┐  ┬
       "\u2575", "\u2514", "\u2518", "\u2534",   #  ╵  └  ┘  ┴
       "\u2502", "\u251C", "\u2524", "\u253C"]   #  │  ├  ┤  ┼
 
-    snew = ["", "\u2574", "\u2576", "\u2500",   #     ╴  ╶  ─
-      "\u2575", "\u2514", "\u2518", "\u2534",   #  ╵  ┘  └  ┴
-      "\u2577", "\u2510", "\u250C", "\u252C",   #  ╷  ┐  ┌  ┬
-      "\u2502", "\u2524", "\u251C", "\u253C"]   #  │  ┤  ├  ┼
-
-    aux_n = Cell.new(-1,-1)
-    aux_w = Cell.new(-1,-1)
-    aux_d = Cell.new(-1,-1)
-    aux_n.link(aux_d)
-    aux_w.link(aux_d)
+    aux_nw = aux_ne = aux_sw = aux_se = Cell.new(-1,-1)
+    aux_nw.link(aux_ne)
+    aux_ne.link(aux_se)
+    aux_se.link(aux_sw)
+    aux_sw.link(aux_nw)
 
     # CALCULATION
     out = ""
-    each_row do |row|
+    for r in 0..@rows
       top = "\t"
       mid = "\t"
-      btm = "\t"
-      for cell_ in row.each
-        cell_n = cell_.north ? cell_.north : aux_n
-        cell_w = cell_.west  ? cell_.west  : aux_w
-        cell_d = cell_n.west ? cell_n.west : aux_d
+      for c in 0..@cols
+        cell_nw = self[r-1, c-1] || aux_nw
+        cell_ne = self[r-1, c-0] || aux_ne
+        cell_sw = self[r-0, c-1] || aux_sw
+        cell_se = self[r-0, c-0] || aux_se
 
-        # Edges referenced about NW corner of cell_
-        edge_n = !cell_n.linked?(cell_d)
-        edge_s = !cell_w.linked?(cell_)
-        edge_w = !cell_w.linked?(cell_d)
-        edge_e = !cell_n.linked?(cell_)
+        edge_n = !cell_nw.linked?(cell_ne)
+        edge_s = !cell_se.linked?(cell_sw)
+        edge_w = !cell_sw.linked?(cell_nw)
+        edge_e = !cell_ne.linked?(cell_se)
         edges = [edge_n, edge_s, edge_w, edge_e]
-        key = edges.inject(0){|n, b| 2*n + (b ?1:0)}
+        key = edges.inject(0){|n, b| 2*n + (b ?1 : 0)}
 
-        top << nswe[key] + (edge_e ? hrz : " ")*3
-        mid << (edge_s ? vrt : " ") + " #{contents_of(cell_)} "
-
-        last_row = (cell_.row == @rows-1)
-        if last_row
-          # Edges referenced about SW corner of cell_
-          edge_n = edge_s
-          edge_s = false
-          edge_w = !cell_.west.nil?
-          edge_e = true
-          edges = [edge_n, edge_s, edge_w, edge_e]
-          key = edges.inject(0){|n, b| 2*n + (b ?1:0)}
-
-          btm << nswe[key] + hrz*3
-        end
+        top << nswe[key] + (edge_e ? hrz1 : hrz0)
+        mid << (edge_s ? vrt1 : vrt0) + " #{contents_of(cell_se)} "
       end
-      # Edges referenced about NE corner of cell_
-      edge_n = !cell_.north.nil?
-      edge_s = true
-      edge_w = !cell_n.linked?(cell_)
-      edge_e = false
-      edges = [edge_n, edge_s, edge_w, edge_e]
-      key = edges.inject(0){|n, b| 2*n + (b ?1:0)}
-
-      top << nswe[key] + "\n"
-      mid << vrt + "\n"
-      out << top + mid + (last_row ? btm : "")
-    end
-    out << crn + "\n\n"
-  end
-
-  def to_s
-    hrz  =  "\u2500"    #  ─
-    vrt  =  "\u2502"    #  │
-    crn  =  "\u2518"    #  ┘
-    nswe = ["", "\u2576", "\u2574", "\u2500",     #     ╶  ╴  ─
-      "\u2577", "\u250C", "\u2510", "\u252C",     #  ╷  ┌  ┐  ┬
-      "\u2575", "\u2514", "\u2518", "\u2534",     #  ╵  └  ┘  ┴
-      "\u2502", "\u251C", "\u2524", "\u253C"]     #  │  ├  ┤  ┼
-
-    extended = Grid.new(@rows+2, @cols+2)
-    for r in 0...@rows
-      for c in 0...@cols
-        extended[r+1, c+1] = @grid[r,c]
-      end
-    end
-    for r in 0...@rows+2
-      cell1 = extended[r, 0]
-      cell2 = extended[r, @cols+1]
-      if cell1.north
-        cell1.link(cell1.north)
-        cell2.link(cell2.north)
-      end
-      if cell1.south
-        cell1.link(cell1.south)
-        cell2.link(cell2.south)
-      end
-    end
-    for c in 0...@cols+2
-      cell1 = extended[0, c]
-      cell2 = extended[@rows+1, c]
-      if cell1.west
-        cell1.link(cell1.west)
-        cell2.link(cell2.west)
-      end
-      if cell1.east
-        cell1.link(cell1.east)
-        cell2.link(cell2.east)
-      end
-    end
-
-    out = ""
-    for r in 0..@rows do
-      top = "\t"
-      mid = "\t"
-      for c in 0..@cols do
-        cell_  = extended[r+1, c+1]
-        cell_n = cell_.north
-        cell_w = cell_.west
-        cell_d = cell_n.west
-
-        # Edges referenced about NW corner of cell_
-        edge_n = !cell_n.linked?(cell_d)
-        edge_s = !cell_w.linked?(cell_)
-        edge_w = !cell_w.linked?(cell_d)
-        edge_e = !cell_n.linked?(cell_)
-        edges = [edge_n, edge_s, edge_w, edge_e]
-        key = edges.inject(0){|n, b| 2*n + (b ?1:0)}
-
-        top << nswe[key] + (edge_e ? hrz : " ")*3
-        mid << (edge_s ? vrt : " ") + " #{contents_of(cell_)} "
-
-      end
-      top << "\n"
-      mid << "\n"
-      out << top + mid
+      out << top + "\n" + mid + "\n"
     end
     out
   end

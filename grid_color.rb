@@ -2,16 +2,17 @@ require_relative 'grid'
 require 'chunky_png'
 
 class ColorGrid < Grid
-  def distances=(distances)
-    @distances = distances
-    farthest, @max = distances.max
+  def distances=(dists)
+    @distances = dists
+    farthest, @max = dists.max
   end
 
   def background_color_for(cell)
-    dist = @distances[cell] or return nil
-    intensity = (@max - dist).to_f / @max
-    dark = (255 * intensity).round
-    bright = 128 + (127 * intensity).round
-    ChunkyPNG::Color.rgb(dark, bright, dark)
+    dist   = @distances[cell] || return nil
+    zerone = (@max - dist).to_f / @max
+    r = (255 * zerone).round
+    g = (127 * zerone).round + 128
+    b = (255 * zerone).round
+    ChunkyPNG::Color.rgb(r, g, b)
   end
 end
