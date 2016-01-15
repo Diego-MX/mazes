@@ -1,6 +1,6 @@
 class AldousBroder
 
-  def self.on(grid)
+  def self.on2(grid)
     cell = grid.rand_cell
     unvstd = grid.size - 1
     while unvstd > 1
@@ -14,7 +14,7 @@ class AldousBroder
     grid
   end
 
-  def self.on2(grid)
+  def self.on(grid)
     # Ruby in the learning, for which the code needs some translating.
     require 'pickup'  # Does this need gem pickup on terminal?
 
@@ -22,19 +22,21 @@ class AldousBroder
       abs(cell1.row - cell0.row) + abs(cell1.col - cell0.col)
     end
 
-    unvisited = Set.new(grid.each_cell)
-    def borders_unvisited?(cell)  # How does this depend on unvisited, dynamically or statically?
-      !(cell in unvisited) and any(cell.neighbors in unvisited)
+    def borders?(cell, outside)
+      !(outside.include(cell)) & any? {|other| outside.include(other)}
     end
 
+    unvisited = Set.new
+    grid.each_cell {|cell| unvisited.add(cell)}
     boundaries = Hash.new()
     cell = unvisited.sample
     cell = unvisited.delete(cell)
     until unvisited.empty? do
       # Examine BOUNDARIES Keys
-      candidates = cell.neighbors.join(cell)
+      cell_neighbors = cell.neighbors
+      candidates = cell_neighbors << cell
       candidates.each do |cndte|
-        borders_unvisited?(cndte) ? boundaries.add(cndte => 1): boundaries.delete(cndte)
+        borders?(cndte, unvisited) ? boundaries.add(cndte => 1) :   boundaries.delete(cndte)
       end
       # Adjust BOUNDARIES Values
       boundaries.each do |bndry|

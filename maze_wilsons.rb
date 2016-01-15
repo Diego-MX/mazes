@@ -21,14 +21,11 @@ class Wilsons
           path << cell
         end
       end
-
       0.upto(path.length-2) do |index|
         path[index].link(path[index + 1])
         unvisited.delete(path[index])
       end
     end
-
-
     grid
   end
 
