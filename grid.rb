@@ -26,11 +26,11 @@ class Grid
 
   def configure_cells
     each_cell do |cell|
-      row, col = cell.row, cell.col
-      cell.north = self[row-1, col]
-      cell.south = self[row+1, col]
-      cell.east  = self[row, col+1]
-      cell.west  = self[row, col-1]
+      r, c = cell.row, cell.col
+      cell.north = self[r-1, c  ]
+      cell.south = self[r+1, c  ]
+      cell.east  = self[r  , c+1]
+      cell.west  = self[r  , c-1]
     end
   end
 
@@ -72,7 +72,7 @@ class Grid
 
       row.each do |cell|
         cell = Cell.new(-1, -1) unless cell
-        east_bdry  = (cell.linked?(cell.east ) ? " "  : "|")
+        east_bdry  = (cell.linked?(cell.east ) ? " ": "|")
         south_bdry = (cell.linked?(cell.south) ? "   ": "---")
 
         mid << " #{contents_of(cell)} " << east_bdry
@@ -94,7 +94,6 @@ class Grid
       "\u2577", "\u250C", "\u2510", "\u252C",   #  ╷  ┌  ┐  ┬
       "\u2575", "\u2514", "\u2518", "\u2534",   #  ╵  └  ┘  ┴
       "\u2502", "\u251C", "\u2524", "\u253C"]   #  │  ├  ┤  ┼
-
     aux_nw = aux_ne = aux_sw = aux_se = Cell.new(-1,-1)
     aux_nw.link(aux_ne)
     aux_ne.link(aux_se)
@@ -108,16 +107,16 @@ class Grid
       mid = "\t"
       for c in 0..@cols
         cell_nw = self[r-1, c-1] || aux_nw
-        cell_ne = self[r-1, c-0] || aux_ne
-        cell_sw = self[r-0, c-1] || aux_sw
-        cell_se = self[r-0, c-0] || aux_se
+        cell_ne = self[r-1, c  ] || aux_ne
+        cell_sw = self[r  , c-1] || aux_sw
+        cell_se = self[r  , c  ] || aux_se
 
         edge_n = !cell_nw.linked?(cell_ne)
         edge_s = !cell_se.linked?(cell_sw)
         edge_w = !cell_sw.linked?(cell_nw)
         edge_e = !cell_ne.linked?(cell_se)
         edges = [edge_n, edge_s, edge_w, edge_e]
-        key = edges.inject(0){|n, b| 2*n + (b ?1 : 0)}
+        key = edges.inject(0){|n, b| 2*n + (b ? 1 : 0)}
 
         top << nswe[key] + (edge_e ? hrz1 : hrz0)
         mid << (edge_s ? vrt1 : vrt0) + " #{contents_of(cell_se)} "
