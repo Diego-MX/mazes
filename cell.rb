@@ -9,7 +9,7 @@ class Cell
       @links = {}
     end
     def to_s
-      "<Cell object at (#{@row}, #{@col})>"
+      "<Cell at (#{@row}, #{@col})>"
     end
 
 
@@ -39,6 +39,10 @@ class Cell
       return list
     end
 
+    def borders?(cell_array)
+      !cell_array.include?(self) &
+        self.neighbors.any? {|other| cell_array.include?(other)}
+    end
 
     def distances
       dstncs = Distances.new(self)
@@ -60,4 +64,7 @@ class Cell
       return dstncs
     end
 
+    def manhattan(other)
+      (other.row - self.row).abs + (other.col - self.col).abs
+    end
 end

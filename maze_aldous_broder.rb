@@ -1,3 +1,5 @@
+require 'pickup'
+
 class AldousBroder
 
   def self.on2(grid)
@@ -15,39 +17,31 @@ class AldousBroder
   end
 
   def self.on(grid)
-    # Ruby in the learning, for which the code needs some translating.
-    require 'pickup'  # Does this need gem pickup on terminal?
-
-    def manhattan(cell1, cell0)
-      abs(cell1.row - cell0.row) + abs(cell1.col - cell0.col)
-    end
-
-    def borders?(cell, outside)
-      !(outside.include(cell)) & any? {|other| outside.include(other)}
-    end
-
-    unvisited = Set.new
-    grid.each_cell {|cell| unvisited.add(cell)}
+    unvisited = Array.new;  grid.each_cell {|cell| unvisited.push(cell)}
     boundaries = Hash.new()
+
     cell = unvisited.sample
-    cell = unvisited.delete(cell)
+    unvisited.delete(cell)
     until unvisited.empty? do
-      # Examine BOUNDARIES Keys
-      cell_neighbors = cell.neighbors
-      candidates = cell_neighbors << cell
+      candidates = cell.neighbors;  candidates.push(cell)
       candidates.each do |cndte|
-        borders?(cndte, unvisited) ? boundaries.add(cndte => 1) :   boundaries.delete(cndte)
+        if cndte.borders?(unvisited) then
+          boundaries[cndte] = 1 else
+          boundaries.delete(cndte)
+        end
       end
-      # Adjust BOUNDARIES Values
-      boundaries.each do |bndry|
-        boundaries[bndry] = 1/ (1+ manhattan(bndry, cell))
-      end
-      # Choose CELL from BOUNDARY with weights and its NEIGHBOR.
-      bndry = Pickup.new(boundaries).pick   # Is this the best package to sample with weights?
-      bndry_neighbors = filter(neighbors in unvisited)
-      cell = bndry_neighbors.sample
-      unvisited.delete(cell)
+      boundaries.update(boundaries) {|bndry, _|
+        1.0/ 2**(1+cell.manhattan(bndry))}
+
+      bndry = Pickup.new(boundaries).pick
+      bndry_neighbors = bndry.neighbors & unvisited
+      nghbr = bndry_neighbors.sample
+      bndry.link(nghbr)
+      unvisited.delete(nghbr)
+
+      cell = nghbr
     end
+    puts grid
     grid
   end
 end
