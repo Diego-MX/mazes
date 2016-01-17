@@ -1,8 +1,9 @@
+require_relative 'grid'
 require 'pickup'
 
 class AldousBroder
 
-  def self.on2(grid)
+  def self.on_0(grid)
     cell = grid.rand_cell
     unvstd = grid.size - 1
     while unvstd > 1
@@ -23,15 +24,16 @@ class AldousBroder
     cell = unvisited.sample
     unvisited.delete(cell)
     until unvisited.empty? do
-      candidates = cell.neighbors;  candidates.push(cell)
+      candidates = cell.neighbors | [cell]
       candidates.each do |cndte|
-        if cndte.borders?(unvisited) then
-          boundaries[cndte] = 1 else
+        if cndte.borders?(unvisited)
+          boundaries[cndte] = 1
+        else
           boundaries.delete(cndte)
         end
       end
       boundaries.update(boundaries) {|bndry, _|
-        1.0/ 2**(1+cell.manhattan(bndry))}
+        1.0/ 3**(1+cell.manhattan(bndry))}        # Can modify weights here.
 
       bndry = Pickup.new(boundaries).pick
       bndry_neighbors = bndry.neighbors & unvisited
