@@ -1,25 +1,25 @@
 class RecursiveBacktracker
   def on(grid)
-    # unvisited = Array.new; grid.each_cell {|cell| unvisited << cell}
-  
-    current = grid.rand_cell
-    maze_stack = [current]
-    # unvisited.delete(current)
+    starter = grid.rand_cell
+    maze_stack = [starter]
     
-    while current 
-      unvstd_neighbors = current.neighbors.select {|ngbr| !ngbr.links.any?}
-      # unvstd_neighbors = current.neighbors & unvisited
+    until maze_stack.empty?
+      current = maze_stack.last
+      unvisitd_neighbors = current.neighbors.select {|ngbr| !ngbr.links.any?}
+      # A cell is unvisited if it has no links.
       
-      ngbr = unvstd_neighbors.sample   # Does .sample return nil when empty?
-      if ngbr 
+      if !unvisited_neighbors.empty?
+        ngbr = unvisited_neighbors.sample
         current.link(ngbr)
         maze_stack << ngbr
-        current = ngbr
       else
         maze_stack.pop
-        current = maze_stack.last  # Does .last return nil when empty? 
       end
+      current = maze_stack.last   # Does .last return nil when empty? 
     end
+    
+    puts grid
+    grid
   end
 
 end
