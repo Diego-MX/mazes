@@ -29,6 +29,9 @@ class Cell
     def linked?(other)
       @links.key?(other)
     end
+    def unvisited?
+      self.links.empty?
+    end
 
     def neighbors
       list = []
